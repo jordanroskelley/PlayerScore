@@ -1,6 +1,9 @@
-Hi, welcome to my readme... and thanks for opening it. This is my first git project, and so I'm just trying to figure it all out with this simple app that I've been writing. I'm writing using AIDE for android, and it's pretty cool so far.
+Hi, welcome to my readme... and thanks for opening it. This is my first git project,
+and so I'm just trying to figure it all out with this simple app that I've been writing.
+I'm writing using AIDE for android, and it's pretty cool so far.
 
-For now, you can add players, and that's about it.
+For now, you can add players, and that's about it. It stores those players in a json string
+in the shared preferences. I may eventually need a database, but prefs works for now :)
 
 Todo:
 allow player selection after start
