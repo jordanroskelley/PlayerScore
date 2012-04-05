@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    <TextView
+        android:id="@+id/title_playerSelect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:text="@string/title_playerSelect"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    <LinearLayout
+        android:id="@+id/ll_settingsBtnHolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal" >
+		<Button
+		    android:id="@+id/btn_playerSelectDone"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+		    android:onClick="buttonHandler"
+		    android:text="@string/btn_done"
+		    android:layout_weight="1"/>
+    </LinearLayout>
+    <ListView
+        android:id="@+id/lv_players"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_above="@id/ll_settingsBtnHolder"
+        android:layout_below="@id/title_playerSelect" >
+    </ListView>
+</RelativeLayout>
