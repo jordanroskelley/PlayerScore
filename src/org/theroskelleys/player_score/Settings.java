@@ -106,6 +106,7 @@ public class Settings extends ListActivity
 		et.setText("");
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void fillLV()
 	{
 		//read from sp
