@@ -1,0 +1,8 @@
+Hi, welcome to my readme... and thanks for opening it. This is my first git project, and so I'm just trying to figure it all out with this simple app that I've been writing. I'm writing using AIDE for android, and it's pretty cool so far.
+
+For now, you can add players, and that's about it.
+
+Todo:
+allow player selection after start
+keep scores for those players on the next screen
+have a dynamically sized table based on the number of players
