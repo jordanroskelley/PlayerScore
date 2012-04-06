@@ -115,6 +115,9 @@ public class Settings extends ListActivity
 		//deserialize json
 		names = (ArrayList<String>)g.fromJson(jsonNames, ArrayList.class);
 		
+		if(names == null) {
+			names = new ArrayList<String>();
+		}
 		//set content to arraylist
 		aa = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, names);
 		setListAdapter(aa);
