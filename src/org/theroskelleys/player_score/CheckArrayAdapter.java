@@ -4,11 +4,13 @@ import java.util.List;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class CheckArrayAdapter extends ArrayAdapter<CheckRowItem>
 {
@@ -40,6 +42,7 @@ public class CheckArrayAdapter extends ArrayAdapter<CheckRowItem>
 			final ViewHolder viewHolder = new ViewHolder();
 			viewHolder.text = (TextView) view.findViewById(R.id.label);
 			viewHolder.checkbox = (CheckBox) view.findViewById(R.id.check);
+			//TODO figure out how to attach click handler to the view itself, instead of just the checkbox
 			viewHolder.checkbox
 				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					@Override
@@ -49,7 +52,6 @@ public class CheckArrayAdapter extends ArrayAdapter<CheckRowItem>
 						CheckRowItem element = (CheckRowItem) viewHolder.checkbox
 							.getTag();
 						element.setSelected(buttonView.isChecked());
-						
 					}
 				});
 			view.setTag(viewHolder);

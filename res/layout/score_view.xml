@@ -10,4 +10,12 @@
         android:gravity="center"
         android:text="@string/title_scores"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+    <TableLayout
+        android:id="@+id/tbl_scores"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/title_scores"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        android:stretchColumns="*" />
 </RelativeLayout>

@@ -97,7 +97,9 @@ public class Settings extends ListActivity
 	private void addName(){
 		//capture new name
 		String newName = et.getText().toString();
-		
+		if(newName.length() < 1) {
+			return;
+		}
 		//append to arraylist
 		names.add(newName);
 		
