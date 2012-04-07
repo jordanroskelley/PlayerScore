@@ -18,6 +18,7 @@ public class SelectPlayer extends ListActivity {
 	SharedPreferences sp;
 	Gson g;
 	List<CheckRowItem> list;
+	String[] names;
 	
 	@Override
 	public void onCreate(Bundle b) {
@@ -25,23 +26,25 @@ public class SelectPlayer extends ListActivity {
 		setContentView(R.layout.select_player);
 		
 		fillHandles();
-		
-		ArrayAdapter<CheckRowItem> adapter = new CheckArrayAdapter(this, getModel());
-		setListAdapter(adapter);
+		//make sure there are names! it will fc
+		if(names.length < 1){
+			Toast.makeText(this, "You must add players in Settings", Toast.LENGTH_SHORT).show();
+		}
+		else{
+			ArrayAdapter<CheckRowItem> adapter = new CheckArrayAdapter(this, getModel());
+			setListAdapter(adapter);
+		}
 	}
 	
 	private void fillHandles() {
 		list = new ArrayList<CheckRowItem>();
 		sp = PreferenceManager.getDefaultSharedPreferences(this);
 		g = new Gson();
+		String jsonNames = sp.getString("names", "");
+		names = g.fromJson(jsonNames, String[].class);
 	}
 
 	private List<CheckRowItem> getModel() {
-		String jsonNames = sp.getString("names", "");
-		String[] names = g.fromJson(jsonNames, String[].class);
-		
-		//TODO check for null names and warn user that they need to enter names
-		
 		for(String s:names) {
 			list.add(new CheckRowItem(s));
 		}

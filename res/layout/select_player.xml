@@ -21,7 +21,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 		    android:onClick="buttonHandler"
-		    android:text="@string/btn_done"
+		    android:text="@string/btn_continue"
 		    android:layout_weight="1"/>
     </LinearLayout>
     <ListView

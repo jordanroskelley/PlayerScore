@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.*;
 
 public class CheckArrayAdapter extends ArrayAdapter<CheckRowItem>
 {
@@ -40,7 +41,19 @@ public class CheckArrayAdapter extends ArrayAdapter<CheckRowItem>
 			final ViewHolder viewHolder = new ViewHolder();
 			viewHolder.text = (TextView) view.findViewById(R.id.label);
 			viewHolder.checkbox = (CheckBox) view.findViewById(R.id.check);
-			//TODO figure out how to attach click handler to the view itself, instead of just the checkbox
+			
+			view.setOnClickListener(new View.OnClickListener(){
+				@Override
+				public void onClick(View v){
+					//find checkbox in view
+					CheckBox cb = (CheckBox)v.findViewById(R.id.check);
+					//change its state
+					cb.toggle();
+					//possibly invalidate it, so it trickles down
+					//it should update the model too from the oncheckchangedlistener below
+				}
+			});
+			
 			viewHolder.checkbox
 				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					@Override
