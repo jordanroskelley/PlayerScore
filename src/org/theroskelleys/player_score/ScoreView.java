@@ -30,15 +30,17 @@ public class ScoreView extends Activity {
 		scores = new GameScores();
 		//load names from shared prefs into scores
 		getChosenNames();
+		paintScoreEntryFields();
+		redrawScores();
 		//print the row with the names (and a blank above the round column)
 		//printNames();
 		//create a new row and add the round information
-		paintNextRound();
-		paintNextRound();
+		//paintNextRound();
 		//should draw the correct number of edittexts into the ll
 		//paintScoreEntryFields();
 	}
 	
+	/*
 	public void paintNextRound(){
 		thisRound = new TableRow(this);
 		
@@ -53,23 +55,68 @@ public class ScoreView extends Activity {
 		}
 		
 		scores.currentRound++;
-		tl.addView(thisRound, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-													LayoutParams.WRAP_CONTENT));
+		tl.addView(thisRound, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+	}
+	*/
+	
+	/**
+	 * redraws the table, called between each score entry to keep the UI up to date
+	 */
+	private void redrawScores() {
+		//remove old data and redraw the names
+		tl.removeAllViews();
+		printNames();
+		
+		//roundCounter is just the counter to move through the rounds, scores.currentRound is the current round being played. this keeps us from printing rounds ahead of the current round
+		for(int roundCounter = 0; roundCounter < scores.currentRound; roundCounter++) {
+			//get a new row
+			thisRound = new TableRow(this);
+			
+			//set the round name column
+			TextView tv = new TextView(this);
+			tv.setText("Round "+String.valueOf(scores.currentRound));
+			thisRound.addView(tv);
+			
+			//for each player, look up their score for the current round and add it to the row
+			for(PlayerScore ps:scores.ps){
+				tv = new TextView(this);
+				Integer thisScore;
+				
+				try {
+					thisScore = ps.scores.get(roundCounter);
+				}
+				catch(Exception e) {
+					thisScore = 0;
+				}
+				
+				tv.setText(thisScore.toString());
+				thisRound.addView(tv);
+			}
+			//add the row, and move on to the next round, until you hit the current round
+			tl.addView(thisRound, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+		}
 	}
 
+	/**
+	 * Prints the names of the current players to the table
+	 */
 	private void printNames() {
 		TableRow tr = new TableRow(this);
-		View cornerPlaceholder = new View(this);
-		tr.addView(cornerPlaceholder);
+		//add a blank view to the corner, to go above the round counts...
+		tr.addView(new TextView(this));
+		//add the names
 		for (PlayerScore ps : scores.ps) {
 			TextView tv = new TextView(this);
 			tv.setText(ps.name);
 			tr.addView(tv);
 		}
-		tl.addView(tr, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT));
+		//add this row to the table
+		tl.addView(tr, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 	}
 
+	/**
+	 * Looks up the names of the players for this round, and creates PlayerScore sub-objects for the GameScore object 
+	 */
 	private void getChosenNames() {
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(this);
@@ -81,23 +128,47 @@ public class ScoreView extends Activity {
 		}
 	}
 	
+	/**
+	 * We have to do this dynamically instead of in xml because we don't know how many players there will be... we have already painted the submit button though
+	 */
 	private void paintScoreEntryFields() {
-		TableRow ll = (TableRow)findViewById(R.id.tr_entry);
+		//TableRow entryRow = (TableRow)findViewById(R.id.tr_entry);
+		LinearLayout llEntry = (LinearLayout)findViewById(R.id.ll_entry);
 		
 		for(int i = 0; i < scores.ps.size(); i++) {
 			//add entry
 			EditText et = new EditText(this);
 			//TODO possibly hold an array of et's in memory, and then when they finish a round, just loop that array?
 			et.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-			ll.addView(et);
+			et.setWidth(300);
+			llEntry.addView(et);
+			//entryRow.addView(et);
 		}
 	}
 	
+	/**
+	 * Handles button views, pretty basic
+	 * @param v - the view that was clicked, we check it's id to see who it was
+	 */
 	public void buttonHandler(View v) {
 		switch (v.getId()) {
 			case R.id.btn_submit:
-				TableRow ets = (TableRow)findViewById(R.id.tr_entry);
-				ets.getChildAt(1);
+				//get handle to row
+				//TableRow row = (TableRow)findViewById(R.id.tr_entry);
+				LinearLayout llEntry = (LinearLayout)findViewById(R.id.ll_entry);
+				
+				EditText et;
+				//for each child (excepting the submit button) get it's text and if it isn't null/empty, update this round's scores with that number
+				for(int i = 1; i < llEntry.getChildCount(); i++) {
+					et = (EditText)llEntry.getChildAt(i);
+					String entered = et.toString();
+					
+					if(entered != null && entered.length() > 0) {
+						//update scores
+						//TODO this gives a number parse error... 
+						scores.ps.get(i).scores.set(scores.currentRound, Integer.parseInt(entered));
+					}
+				}
 				break;
 		}
 	}
