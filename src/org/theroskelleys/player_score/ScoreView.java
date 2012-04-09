@@ -26,43 +26,35 @@ public class ScoreView extends Activity {
 		setContentView(R.layout.score_view);
 
 		tl = (TableLayout) findViewById(R.id.tbl_scores);
+		//initialize variable
 		scores = new GameScores();
+		//load names from shared prefs into scores
 		getChosenNames();
-		printNames();
+		//print the row with the names (and a blank above the round column)
+		//printNames();
+		//create a new row and add the round information
 		paintNextRound();
-		paintScoreEntryFields();
-	}
-
-	public void buttonHandler(View v) {
-		switch (v.getId()) {
-
-		}
+		paintNextRound();
+		//should draw the correct number of edittexts into the ll
+		//paintScoreEntryFields();
 	}
 	
 	public void paintNextRound(){
 		thisRound = new TableRow(this);
+		
 		TextView tv = new TextView(this);
-		String roundName = "Round "+String.valueOf(scores.currentRound);
-		Toast.makeText(this, roundName, Toast.LENGTH_LONG).show();
-		tv.setText(roundName);
+		tv.setText("Round "+String.valueOf(scores.currentRound));
 		thisRound.addView(tv);
+		
+		for(PlayerScore ps:scores.ps){
+			tv = new TextView(this);
+			tv.setText(String.valueOf(ps.scores.get(scores.currentRound)));
+			thisRound.addView(tv);
+		}
+		
+		scores.currentRound++;
 		tl.addView(thisRound, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT,
 													LayoutParams.WRAP_CONTENT));
-	}
-	
-	private void paintScoreEntryFields() {/*
-		LinearLayout ll = (LinearLayout)findViewById(R.id.ll_entry);
-		View cornerPlaceholder = new View(this);
-		ll.addView(cornerPlaceholder);
-		
-		for(int i = 0; i < scores.ps.size(); i++) {
-			//add entry
-			EditText et = new EditText(this);
-			//TODO possibly hold an array of et's in memory, and then when they finish a round, just loop that array?
-			et.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-			ll.addView(et);
-		}
-		*/
 	}
 
 	private void printNames() {
@@ -86,6 +78,27 @@ public class ScoreView extends Activity {
 		String[] chosenNames = g.fromJson(jsonChosenNames, String[].class);
 		for(String name:chosenNames){
 			scores.ps.add(new PlayerScore(name));
+		}
+	}
+	
+	private void paintScoreEntryFields() {
+		TableRow ll = (TableRow)findViewById(R.id.tr_entry);
+		
+		for(int i = 0; i < scores.ps.size(); i++) {
+			//add entry
+			EditText et = new EditText(this);
+			//TODO possibly hold an array of et's in memory, and then when they finish a round, just loop that array?
+			et.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+			ll.addView(et);
+		}
+	}
+	
+	public void buttonHandler(View v) {
+		switch (v.getId()) {
+			case R.id.btn_submit:
+				TableRow ets = (TableRow)findViewById(R.id.tr_entry);
+				ets.getChildAt(1);
+				break;
 		}
 	}
 }

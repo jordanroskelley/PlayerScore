@@ -11,30 +11,26 @@
         android:text="@string/title_scores"
         android:textAppearance="?android:attr/textAppearanceLarge" />
     <TableLayout
-        android:id="@+id/tbl_scores"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_below="@id/title_scores"
-        android:layout_alignParentBottom="true"
-        android:stretchColumns="*"
-        android:gravity="center" />
-    <!-- <LinearLayout 
-        android:id="@+id/ll_entry"
+        android:id="@+id/tbl_scoreEntry"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal" >
-        <TextView
-            android:id="@+id/tv_testing"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="hello" />
-
-    </LinearLayout>
+		android:layout_alignParentBottom="true"
+        android:stretchColumns="*"
+        android:gravity="center" >
+	    <TableRow 
+    	    android:id="@+id/tr_entry">
+	        <Button
+    	        android:id="@+id/btn_submit"
+	            android:text="Submit"
+				android:onClick="buttonHandler"/>
+    	</TableRow>
+	</TableLayout>
     <TableLayout
         android:id="@+id/tbl_scores"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/title_scores"
-        android:layout_above="@id/ll_entry" /> -->
+        android:layout_above="@id/tbl_scoreEntry"
+        android:stretchColumns="*"
+        android:gravity="center" />
 </RelativeLayout>
