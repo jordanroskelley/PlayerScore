@@ -80,16 +80,16 @@ public class ScoreView extends Activity {
 			//for each player, look up their score for the current round and add it to the row
 			for(PlayerScore ps:scores.ps){
 				tv = new TextView(this);
-				Integer thisScore;
+				String setText;
 				
 				try {
-					thisScore = ps.scores.get(roundCounter);
+					setText = String.valueOf(ps.scores.get(roundCounter));
 				}
 				catch(Exception e) {
-					thisScore = 0;
+					setText = "0";
 				}
 				
-				tv.setText(thisScore.toString());
+				tv.setText(String.valueOf(setText));
 				thisRound.addView(tv);
 			}
 			//add the row, and move on to the next round, until you hit the current round
@@ -159,13 +159,15 @@ public class ScoreView extends Activity {
 				
 				EditText et;
 				//for each child (excepting the submit button) get it's text and if it isn't null/empty, update this round's scores with that number
-				for(int i = 1; i < llEntry.getChildCount(); i++) {
+				int childrenNum = (llEntry.getChildCount()-1);
+				Toast.makeText(this, "children: "+childrenNum, Toast.LENGTH_LONG).show();
+				for(int i = 1; i < childrenNum; i++) {
 					et = (EditText)llEntry.getChildAt(i);
-					String entered = et.toString();
+					String entered = et.getText().toString();
 					
 					if(entered != null && entered.length() > 0) {
 						//update scores
-						//TODO this gives a number parse error... 
+						//TODO this gives a number parse error...
 						scores.ps.get(i).scores.set(scores.currentRound, Integer.parseInt(entered));
 					}
 				}
