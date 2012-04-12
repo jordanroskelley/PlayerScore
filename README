@@ -6,6 +6,6 @@ For now, you can add players, and that's about it. It stores those players in a 
 in the shared preferences. I may eventually need a database, but prefs works for now :)
 
 Todo:
-allow player selection after start
-keep scores for those players on the next screen
-have a dynamically sized table based on the number of players
+Change system to just have arrays of EditTexts.
+This will be more resource intensive, but will allow editing past scores more easily as well.
+
