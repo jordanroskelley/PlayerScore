@@ -2,10 +2,17 @@ Hi, welcome to my readme... and thanks for opening it. This is my first git proj
 and so I'm just trying to figure it all out with this simple app that I've been writing.
 I'm writing using AIDE for android, and it's pretty cool so far.
 
-For now, you can add players, and that's about it. It stores those players in a json string
+You can add players, in setting. It stores those players in a json string
 in the shared preferences. I may eventually need a database, but prefs works for now :)
 
+Then you can start a game, choose players, enter scores, and see totals.
+
 Todo:
-Change system to just have arrays of EditTexts.
-This will be more resource intensive, but will allow editing past scores more easily as well.
+add scroll view to table (or convert first row to linearlayout and wrap table in sv)...
+rotating loses context and clears data
+layout still kinda sucks
+ability to use initials instead of name for small screens
+lifecycle in scoreview
+
+
 
