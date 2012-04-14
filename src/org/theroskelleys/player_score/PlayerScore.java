@@ -1,5 +1,6 @@
 package org.theroskelleys.player_score;
 import java.util.*;
+import android.widget.*;
 
 public class PlayerScore
 {
@@ -8,5 +9,6 @@ public class PlayerScore
 	
 	public PlayerScore(String name){
 		this.name = name;
+		scores = new ArrayList<Integer>();
 	}
 }

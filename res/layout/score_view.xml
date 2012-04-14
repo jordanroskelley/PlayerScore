@@ -1,42 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-    <LinearLayout
-        android:id="@+id/ll_entry"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal">
-        <Button
-   	        android:id="@+id/btn_submit"
-            android:text="Submit"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-			android:onClick="buttonHandler"/>
-    </LinearLayout>
-    <!-- 
-    <TableLayout
-        android:id="@+id/tbl_scoreEntry"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-        android:stretchColumns="*"
-        android:gravity="center_horizontal" >
-	    <TableRow 
-    	    android:id="@+id/tr_entry">
-	        <Button
-    	        android:id="@+id/btn_submit"
-	            android:text="Submit"
-				android:onClick="buttonHandler"/>
-    	</TableRow>
-	</TableLayout> -->
-    <TableLayout
-        android:id="@+id/tbl_scores"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_alignParentTop="true"
-        android:layout_above="@id/ll_entry"
-        android:stretchColumns="*"
-        android:gravity="center_horizontal" />
-</RelativeLayout>
+    android:layout_height="match_parent" 
+    android:id="@+id/tbl_scores"
+    android:stretchColumns="*"
+    android:gravity="center_horizontal" />
