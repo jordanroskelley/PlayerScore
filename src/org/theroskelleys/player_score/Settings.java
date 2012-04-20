@@ -106,6 +106,7 @@ public class Settings extends ListActivity
 		//redraw list
 		aa.notifyDataSetChanged();
 		et.setText("");
+		et.requestFocus();
 	}
 	
 	@SuppressWarnings("unchecked")

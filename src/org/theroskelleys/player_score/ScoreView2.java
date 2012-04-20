@@ -10,10 +10,10 @@ import android.view.inputmethod.*;
 import android.widget.*;
 import com.google.gson.*;
 
-public class ScoreView extends Activity
+public class ScoreView2 extends Activity
 {
 	TableLayout tl;
-	GameScores scores;
+	GameScore scores;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -21,31 +21,38 @@ public class ScoreView extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.score_view);
 		
+		//get handle to the table
 		tl = (TableLayout) findViewById(R.id.tbl_scores);
+		
 		//initialize variable
-		scores = new GameScores();
-		//load names from shared prefs into scores
-		getChosenNames();
-		printNames();
-		printNewRow();
-	}
-	
-	private void addNewRound(){
+		scores = new GameScore(getChosenNames());
 		scores.addNewRound();
 		paintNewRounds();
 	}
 	
 	private void paintNewRounds(){
-		TableRow tRow;
+		TableRow tRow = new TableRow(this);
 		
-		for(int i = 0; i < scores.ps.get(0).scores.size();i++){
-			for(PlayerScore p:scores.ps){
-				if(!p.scores.get(i).isPainted){
-					//create new round row and add it to table
-					
-				}
+		TextView rt = new TextView(this);
+		rt.setText("Round " + scores.currentRound);
+		rt.setTextSize(30);
+		rt.setGravity(Gravity.CENTER);
+		tRow.addView(rt);
+
+		for (int i = 0; i < scores.numPlayers; i++)
+		{
+			EditText et = new EditText(this);
+			et.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+			tRow.addView(et);
+			if (i == 0)
+			{
+				et.requestFocus();
 			}
 		}
+		//add this row to the table
+		tl.addView(tRow, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+		
+		
 	}
 	
 	private void printNewRow()
@@ -58,7 +65,7 @@ public class ScoreView extends Activity
 		rt.setGravity(Gravity.CENTER);
 		tr.addView(rt);
 		
-		for (int i = 0; i < scores.ps.size(); i++)
+		for (int i = 0; i < scores.numPlayers; i++)
 		{
 			EditText et = new EditText(this);
 			et.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
@@ -136,10 +143,10 @@ public class ScoreView extends Activity
 		tr.addView(ll_btn);
 		
 		//add the names
-		for (PlayerScore ps : scores.ps)
-		{
-			tr.addView(getNameTV(ps.name));
-		}
+//		for (PlayerScore ps : scores.ps)
+//		{
+//			tr.addView(getNameTV(ps.name));
+//		}
 		//add this row to the table
 		tl.addView(tr, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 	}
@@ -147,17 +154,14 @@ public class ScoreView extends Activity
 	/**
 	 * Looks up the names of the players for this round, and creates PlayerScore sub-objects for the GameScore object 
 	 */
-	private void getChosenNames()
+	private String[] getChosenNames()
 	{
 		SharedPreferences sp = PreferenceManager
 			.getDefaultSharedPreferences(this);
 		String jsonChosenNames = sp.getString("chosenNames", "");
 		Gson g = new Gson();
-		String[] chosenNames = g.fromJson(jsonChosenNames, String[].class);
-		for (String name:chosenNames)
-		{
-			scores.ps.add(new PlayerScore(name));
-		}
+		return g.fromJson(jsonChosenNames, String[].class);
+		
 	}
 	
 	public void onSubmitClick()
@@ -178,7 +182,7 @@ public class ScoreView extends Activity
 				et = (EditText)tr.getChildAt(j);
 				sc = getNumFromET(et);
 				//add that number to this player
-				scores.ps.get(j - 1).scores.add(new RoundScore());
+//				scores.ps.get(j - 1).scores.add(new RoundScore());
 				//scores.ps.get(j - 1).scores.(sc);
 			}
 		}
@@ -186,15 +190,18 @@ public class ScoreView extends Activity
 	}
 	
 	private void clearPlayerScores(){
+		/*
 		for (int y = 0; y < scores.ps.size(); y++)
 		{
 			scores.ps.get(y).scores.clear();
 		}
+		*/
 	}
 	
 	private void showScores()
 	{
 		String output = "";
+		/*
 		for (PlayerScore ps:scores.ps)
 		{
 			int pTotal = 0;
@@ -205,7 +212,7 @@ public class ScoreView extends Activity
 			}
 			output += pTotal + "\n";
 		}
-		
+		*/
 		output += "\nDo you want to play a new game?";
 		
 		AlertDialog.Builder build = new AlertDialog.Builder(this);

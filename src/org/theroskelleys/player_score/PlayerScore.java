@@ -5,10 +5,10 @@ import android.widget.*;
 public class PlayerScore
 {
 	String name;
-	ArrayList<Integer> scores;
+	ArrayList<RoundScore> scores;
 	
 	public PlayerScore(String name){
 		this.name = name;
-		scores = new ArrayList<Integer>();
+		scores = new ArrayList<RoundScore>();
 	}
 }
