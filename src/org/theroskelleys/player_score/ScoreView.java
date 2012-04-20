@@ -13,7 +13,9 @@ import com.google.gson.*;
 public class ScoreView extends Activity
 {
 	TableLayout tl;
-	GameScores scores;
+	String[] players;
+	int round;
+	int[] totals;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -21,108 +23,110 @@ public class ScoreView extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.score_view);
 		
+		//get handle to the table
 		tl = (TableLayout) findViewById(R.id.tbl_scores);
+		
 		//initialize variable
-		scores = new GameScores();
-		//load names from shared prefs into scores
-		getChosenNames();
+		players = getChosenNames();
+		round = 0;
 		printNames();
-		printNewRow();
+		addRound();
 	}
 	
-	private void addNewRound(){
-		scores.addNewRound();
-		paintNewRounds();
-	}
-	
-	private void paintNewRounds(){
-		TableRow tRow;
-		
-		for(int i = 0; i < scores.ps.get(0).scores.size();i++){
-			for(PlayerScore p:scores.ps){
-				if(!p.scores.get(i).isPainted){
-					//create new round row and add it to table
-					
-				}
-			}
-		}
-	}
-	
-	private void printNewRow()
-	{
-		TableRow tr = new TableRow(this);
-		
+	/**
+	 * Creates a new TableRow to add to the TableLayout
+	 */
+	private void addRound(){
+		round++;
+		TableRow tRow = new TableRow(this);
 		TextView rt = new TextView(this);
-		rt.setText("Round " + scores.currentRound);
+		rt.setText("Round " + round);
 		rt.setTextSize(30);
 		rt.setGravity(Gravity.CENTER);
-		tr.addView(rt);
-		
-		for (int i = 0; i < scores.ps.size(); i++)
+		tRow.addView(rt);
+
+		for (int i = 0; i < players.length; i++)
 		{
 			EditText et = new EditText(this);
 			et.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-			tr.addView(et);
+			tRow.addView(et);
 			if (i == 0)
 			{
 				et.requestFocus();
 			}
 		}
 		//add this row to the table
-		tl.addView(tr, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		scores.currentRound++;
+		tl.addView(tRow, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 	}
 	
-	private static Integer getNumFromET(EditText et){
-		Integer returnValue = 0;
-		
-		String s = et.getText().toString();
-		
-		try{
-			returnValue = Integer.parseInt(s);
-		} catch(Exception e){
-			
-		}
-		
-		return returnValue;
-	}
-	
+	/**
+	 * Creates a 'New Round' button that creates a new TableRow in which to enter scores
+	 * @return - a Button view
+	 */
 	private Button getNewRoundButton(){
 		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f);
 		Button b = new Button(this);
-		b.setText("New Round");
+		b.setText("New");
 		b.setLayoutParams(p);
 		b.setOnClickListener(new View.OnClickListener(){
 				public void onClick(View p1)
 				{
-					printNewRow();
+					addRound();
 				}
 			});
 		return b;
 	}
 	
+	/**
+	 * Creates a 'Totals' button, that calculates totals, and can allow to end the game 
+	 * @return - a Button View
+	 */
 	private Button getTotalsButton(){
 		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f);
 		Button b = new Button(this);
-		b.setText("See Totals");
+		b.setText("Totals");
 		b.setLayoutParams(p);
 		b.setOnClickListener(new View.OnClickListener(){
 				public void onClick(View p1)
 				{
-					onSubmitClick();
+					finishGame();
 				}
 			});
 		return b;
 	}
 	
+	/**
+	 * Sets up a new TextView with a given name pre-filled in it
+	 * @param name - the name to put in the TextView
+	 * @return - the actual, newly instantiated TextView
+	 */
 	private TextView getNameTV(String name){
 		TextView tv = new TextView(this);
 		tv.setText(name);
-		tv.setTextSize(30);
+		tv.setTextSize(25);
 		tv.setGravity(Gravity.CENTER);
 		return tv;
 	}
-	
+    
+	/**
+	 * gets an integer from out of an EditText
+	 * @param et - the EditText to check
+	 * @return - the number found in the EditText
+	 */
+    private static Integer getNumFromET(EditText et){
+        int returnValue;
+        
+        String s = et.getText().toString();
+        
+        try{
+            returnValue = Integer.parseInt(s);
+        } catch(Exception e){
+            returnValue = 0;
+        }
+        
+        return returnValue;
+    }
+    
 	/**
 	 * Prints the names of the current players to the table
 	 */
@@ -136,90 +140,78 @@ public class ScoreView extends Activity
 		tr.addView(ll_btn);
 		
 		//add the names
-		for (PlayerScore ps : scores.ps)
+		for (String name : players)
 		{
-			tr.addView(getNameTV(ps.name));
+			tr.addView(getNameTV(name));
 		}
+		
 		//add this row to the table
 		tl.addView(tr, new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 	}
 	
 	/**
-	 * Looks up the names of the players for this round, and creates PlayerScore sub-objects for the GameScore object 
+	 *  
 	 */
-	private void getChosenNames()
+	
+	/**
+	 * Looks up the names of the players for this round
+	 * @return - an array of the names of the players chosen in the previous Activity
+	 */
+	private String[] getChosenNames()
 	{
 		SharedPreferences sp = PreferenceManager
 			.getDefaultSharedPreferences(this);
 		String jsonChosenNames = sp.getString("chosenNames", "");
 		Gson g = new Gson();
-		String[] chosenNames = g.fromJson(jsonChosenNames, String[].class);
-		for (String name:chosenNames)
-		{
-			scores.ps.add(new PlayerScore(name));
-		}
+		return g.fromJson(jsonChosenNames, String[].class);
+		
 	}
 	
-	public void onSubmitClick()
+	/**
+	 * Adds up the totals, and then calls showScores()
+	 */
+	public void finishGame()
 	{
-		//clear the current scores (since we re-calculate it here)
-		clearPlayerScores();
-		
-		TableLayout tl = (TableLayout)findViewById(R.id.tbl_scores);
 		TableRow tr;
 		EditText et;
-		String text;
-		Integer sc;
-		for (int i = 1; i < tl.getChildCount(); i++)
+		int sc;
+		totals = new int[players.length];
+		for(int x = 0; x < totals.length; x++){
+			totals[x] = 0;
+		}
+		
+		for (int i = 1; i <= round; i++)
 		{
 			tr = (TableRow)tl.getChildAt(i);
-			for (int j = 1; j < tr.getChildCount(); j++)
+			for (int j = 0; j < players.length; j++)
 			{
-				et = (EditText)tr.getChildAt(j);
+				et = (EditText)tr.getChildAt(j+1);
 				sc = getNumFromET(et);
-				//add that number to this player
-				scores.ps.get(j - 1).scores.add(new RoundScore());
-				//scores.ps.get(j - 1).scores.(sc);
+				totals[j] += sc;
 			}
 		}
 		showScores();
 	}
 	
-	private void clearPlayerScores(){
-		for (int y = 0; y < scores.ps.size(); y++)
-		{
-			scores.ps.get(y).scores.clear();
-		}
-	}
-	
+	/**
+	 * Creates a dialog to show the scores, and allow the user to choose whether to continue, quit, or start a new game
+	 */
 	private void showScores()
 	{
-		String output = "";
-		for (PlayerScore ps:scores.ps)
+		StringBuilder output = new StringBuilder();
+		output.append("Scores");
+		for (int y = 0; y < players.length; y++)
 		{
-			int pTotal = 0;
-			output += ps.name + ": ";
-			for (RoundScore x:ps.scores)
-			{
-				pTotal += x.score;
-			}
-			output += pTotal + "\n";
+			output.append("\n").append(players[y]).append(": ").append(totals[y]);
 		}
-		
-		output += "\nDo you want to play a new game?";
+		output.append("\n\nDo you want to play a new game?");
 		
 		AlertDialog.Builder build = new AlertDialog.Builder(this);
-		build.setMessage(output)
+		build.setMessage(output.toString())
 		.setPositiveButton("New", new AlertDialog.OnClickListener(){
 			public void onClick(DialogInterface p1, int p2)
 			{
 				//new
-				clearPlayerScores();
-				scores.currentRound = 1;
-				tl.removeAllViews();
-				printNames();
-				printNewRow();
-				
 			}
 		})
 		.setNegativeButton("Quit", new AlertDialog.OnClickListener(){

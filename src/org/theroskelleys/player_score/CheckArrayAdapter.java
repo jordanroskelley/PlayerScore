@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.*;
 
 public class CheckArrayAdapter extends ArrayAdapter<CheckRowItem>
 {
