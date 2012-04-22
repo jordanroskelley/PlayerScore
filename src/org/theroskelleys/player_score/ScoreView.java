@@ -33,6 +33,20 @@ public class ScoreView extends Activity
 		addRound();
 	}
 	
+	public GameState toGameState(){
+		int[][] scoreArray = new int[round][players.length];
+		
+		for(int i = 1; i < tl.getChildCount(); i++){
+			TableRow tr = (TableRow)tl.getChildAt(i);
+			for(int j = 1; j < tr.getChildCount(); j++){
+				EditText et = (EditText)tr.getChildAt(j);
+				int s = getNumFromET(et);
+				scoreArray[i-1][j-1] = s;
+			}
+		}
+		return new GameState(players, scoreArray);
+	}
+	
 	/**
 	 * Creates a new TableRow to add to the TableLayout
 	 */
@@ -89,7 +103,8 @@ public class ScoreView extends Activity
 		b.setOnClickListener(new View.OnClickListener(){
 				public void onClick(View p1)
 				{
-					finishGame();
+					toGameState();
+					//finishGame();
 				}
 			});
 		return b;
