@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import android.view.*;
 
 public class ScoreView extends Activity {
 	private static final String TAG = "ScoreView";
@@ -51,6 +52,30 @@ public class ScoreView extends Activity {
 		} else {
 			// initialize variables for a new game
 			initializeNewGame();
+		}
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu m){
+		MenuInflater mi = getMenuInflater();
+		mi.inflate(R.menu.menu_score_view, m);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem mi){
+		switch(mi.getItemId()){
+			case R.id.m_end:
+				finish();
+				return true;
+			case R.id.m_save:
+				
+				return true;
+			case R.id.m_total:
+				showScores();
+				return true;
+			default:
+				return super.onOptionsItemSelected(mi);
 		}
 	}
 
