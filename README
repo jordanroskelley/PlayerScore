@@ -10,10 +10,8 @@ Then you can start a game, choose players, enter scores, and see totals. That's 
 it for now. There are still a bunch of bugs and stuff, but that's where we are.
 
 To do in ScoreView.java:
--Convert first row to LinearLayout and wrap table in ScrollView
---To go along with that, create a hidden LinearLayout to go at the bottom to show live totals
---And with that, a menu with options to: finish, save, show totals, etc
--Rotating the device isn't handled... therefore you lose your game. Handle this!
+-Create a 'calculateTotals' function in ScoreView
+-Create a menu with options to: finish, save, show totals, etc
 -Ability to use initials instead of name for small screens (and decrease the round name TextView size)
 --Will also need a way to calculate (or have stored) initials
 -Ability to save/resume game, which will help with the following

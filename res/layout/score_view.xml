@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" 
-    android:id="@+id/tbl_scores"
-    android:stretchColumns="*"
-    android:gravity="center_horizontal" />
+    android:id="@+id/rl_score" >
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="true"
+	    android:id="@+id/ll_players" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+	    android:id="@+id/ll_totals" />
+    <ScrollView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_below="@id/ll_players"
+        android:layout_above="@id/ll_totals"
+	    android:id="@+id/sv_scores">
+        <LinearLayout
+            android:orientation="vertical"
+	        android:layout_height="match_parent"
+	        android:layout_width="match_parent"
+            android:id="@+id/ll_scores" >
+		</LinearLayout>
+    </ScrollView>
+</RelativeLayout>
