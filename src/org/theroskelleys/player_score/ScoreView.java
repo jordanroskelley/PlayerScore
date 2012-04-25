@@ -19,11 +19,13 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import android.view.*;
+import android.widget.*;
 
 public class ScoreView extends Activity {
 	private static final String TAG = "ScoreView";
 	private static final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,1.0f);
-	private LinearLayout list;
+	//private LinearLayout list;
+	TableLayout tl;
 	private String[] players;
 	private int round;
 	private int[] totals;
@@ -34,25 +36,42 @@ public class ScoreView extends Activity {
 		setContentView(R.layout.score_view);
 
 		// get handle to the list
-		list = (LinearLayout) findViewById(R.id.ll_scores);
+		//list = (LinearLayout) findViewById(R.id.ll_scores);
+		tl = (TableLayout) findViewById(R.id.tl_scores);
 
 		// if there was a previous instance, set it up
 		GameState previousGame = null;
-		try {
-			String gameStr = savedInstanceState.getString("GameState");
+		String gameStr = null;
+		try{
+			gameStr = savedInstanceState.getString("GameState");
+		} catch(Exception e){}
+		
+		if(gameStr != null){
 			Gson g = new Gson();
 			previousGame = g.fromJson(gameStr, GameState.class);
-		} catch (Exception e) {
-			Log.e(TAG, "Exception: error deserializing game state.");
-		}
-
-		if (previousGame != null) {
 			// set up the current game using the previous state
 			setUpGame(previousGame);
 		} else {
 			// initialize variables for a new game
 			initializeNewGame();
 		}
+		setupTotalsRow();
+	}
+	
+	private TableRow getNewRow(Integer[] roundScores){
+		TableRow rb = new TableRow(this);
+		round++;
+		rb.addView(getScoreTV("Round "+round));
+		EditText et;
+		for(int i = 0; i < players.length; i++){
+			if(roundScores != null && roundScores[i] != null){
+				et = getET(roundScores[i].toString());
+			} else{
+				et = getET();
+			}
+			rb.addView(et);
+		}
+		return rb;
 	}
 	
 	@Override
@@ -66,13 +85,34 @@ public class ScoreView extends Activity {
 	public boolean onOptionsItemSelected(MenuItem mi){
 		switch(mi.getItemId()){
 			case R.id.m_end:
-				finish();
+				AlertDialog.Builder build = new AlertDialog.Builder(this);
+				build.setMessage("Are you sure you want to quit?")
+					.setPositiveButton("Yes", new AlertDialog.OnClickListener() {
+						public void onClick(DialogInterface p1, int p2) {
+							finish();
+						}
+					})
+					.setNegativeButton("No", new AlertDialog.OnClickListener() {
+						public void onClick(DialogInterface p1, int p2) {
+						}
+					});
+				build.create().show();
 				return true;
 			case R.id.m_save:
 				
 				return true;
-			case R.id.m_total:
+			case R.id.m_done:
+				calculateTotals();
 				showScores();
+				return true;
+			case R.id.m_total:
+				//show/hide totals view
+				LinearLayout totalsLL = (LinearLayout)findViewById(R.id.ll_totals);
+				if(totalsLL.getVisibility() == View.VISIBLE){
+					totalsLL.setVisibility(View.GONE);
+				} else{
+					totalsLL.setVisibility(View.VISIBLE);
+				}
 				return true;
 			default:
 				return super.onOptionsItemSelected(mi);
@@ -91,7 +131,8 @@ public class ScoreView extends Activity {
 		}
 		round = 0;
 		printNames();
-		addRound();
+		TableRow r = getNewRow(null);
+		tl.addView(r);
 	}
 
 	/**
@@ -105,29 +146,16 @@ public class ScoreView extends Activity {
 		for(int i = 0; i < totals.length; i++) {
 			totals[i] = 0;
 		}
-		int[][] tempScores = gs.getRoundScores();
+		Integer[][] tempScores = gs.getRoundScores();
 
 		// add the names row
 		printNames();
+		
+		round = 0;
 
 		for (int i = 0; i < tempScores.length; i++) {
-			LinearLayout ll = getLL();
-			ll.addView(getTV("Round " + (i + 1)));
-			for (int j = 0; j < tempScores[0].length; j++) {
-				EditText et = getET(String.valueOf(tempScores[i][j]));
-				ll.addView(et);
-			}
-			list.addView(ll);
-			round = i + 1;
+			tl.addView(getNewRow(tempScores[i]));
 		}
-	}
-
-	private LinearLayout getLL() {
-		LinearLayout ll = new LinearLayout(this);
-		ll.setOrientation(LinearLayout.HORIZONTAL);
-		ll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT));
-		return ll;
 	}
 
 	/**
@@ -144,37 +172,19 @@ public class ScoreView extends Activity {
 	 * @return
 	 */
 	public GameState toGameState() {
-		int[][] scoreArray = new int[round][players.length];
+		Integer[][] scoreArray = new Integer[round][players.length];
 
-		for (int i = 0; i < list.getChildCount(); i++) {
-			LinearLayout ll = (LinearLayout) list.getChildAt(i);
+		for (int i = 0; i < tl.getChildCount(); i++) {
+			//LinearLayout ll = (LinearLayout) list.getChildAt(i);
+			TableRow ll = (TableRow) tl.getChildAt(i);
+			
 			for (int j = 1; j < ll.getChildCount(); j++) {
 				EditText et = (EditText) ll.getChildAt(j);
-				int s = getNumFromET(et);
+				Integer s = getNumFromET(et);
 				scoreArray[i][j - 1] = s;
 			}
 		}
 		return new GameState(players, scoreArray);
-	}
-
-	/**
-	 * Creates a new TableRow to add to the TableLayout
-	 */
-	private void addRound() {
-		round++;
-		LinearLayout ll = getLL();
-		TextView tv = getTV("Round " + round);
-		ll.addView(tv);
-
-		for (int i = 0; i < players.length; i++) {
-			EditText et = getET();
-			ll.addView(et);
-			if (i == 0) {
-				et.requestFocus();
-			}
-		}
-		// add this row to the table
-		list.addView(ll);
 	}
 
 	/**
@@ -189,25 +199,8 @@ public class ScoreView extends Activity {
 		b.setLayoutParams(lp);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View p1) {
-				addRound();
-			}
-		});
-		return b;
-	}
-
-	/**
-	 * Creates a 'Totals' button, that calculates totals, and can allow to end
-	 * the game
-	 * 
-	 * @return - a Button View
-	 */
-	private Button getTotalsButton() {
-		Button b = new Button(this);
-		b.setText("Totals");
-		b.setLayoutParams(lp);
-		b.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View p1) {
-				finishGame();
+				TableRow r = getNewRow(null);
+				tl.addView(r);
 			}
 		});
 		return b;
@@ -220,18 +213,29 @@ public class ScoreView extends Activity {
 	 *            - the name to put in the TextView
 	 * @return - the actual, newly instantiated TextView
 	 */
-	private TextView getTV(String name) {
+	private TextView getTV() {
 		TextView tv = new TextView(this);
 		tv.setLayoutParams(lp);
-		tv.setText(name);
 		tv.setTextSize(25);
 		tv.setGravity(Gravity.CENTER);
+		return tv;
+	}
+	
+	private TextView getTV(String name){
+		TextView tv = getTV();
+		tv.setText(name);
+		return tv;
+	}
+	
+	private TextView getScoreTV(String name){
+		TextView tv = getScoreTV();
+		tv.setText(name);
 		return tv;
 	}
 
 	private TextView getScoreTV() {
 		TextView tv = new TextView(this);
-		tv.setLayoutParams(lp);
+		//tv.setLayoutParams(lp);
 		tv.setTextSize(15);
 		tv.setGravity(Gravity.CENTER);
 		return tv;
@@ -246,12 +250,13 @@ public class ScoreView extends Activity {
 	private EditText getET() {
 		EditText et = new EditText(this);
 		et.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-		et.setLayoutParams(lp);
+		//et.setLayoutParams(lp);
 		et.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				if (!hasFocus) {
-					Log.d(TAG, "view just lost focus :)");
+					calculateTotals();
+					//Toast.makeText(v.getContext(), "lost focus", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -281,12 +286,7 @@ public class ScoreView extends Activity {
 	 */
 	private void printNames() {
 		LinearLayout playerLL = (LinearLayout) findViewById(R.id.ll_players);
-		LinearLayout ll_btn = new LinearLayout(this);
-		ll_btn.setOrientation(LinearLayout.HORIZONTAL);
-		ll_btn.setLayoutParams(lp);
-		ll_btn.addView(getNewRoundButton());
-		ll_btn.addView(getTotalsButton());
-		playerLL.addView(ll_btn);
+		playerLL.addView(getNewRoundButton());
 
 		// add the names
 		for (String name : players) {
@@ -296,11 +296,11 @@ public class ScoreView extends Activity {
 
 	private void setupTotalsRow() {
 		LinearLayout totalLL = (LinearLayout) findViewById(R.id.ll_totals);
-		totalLL.addView(new View(this));
+		TextView titleTV = getTV("Totals");
+		totalLL.addView(titleTV);
 
-		// add the names
 		for (String name : players) {
-			totalLL.addView(getScoreTV());
+			totalLL.addView(getTV());
 		}
 	}
 
@@ -322,7 +322,7 @@ public class ScoreView extends Activity {
 	/**
 	 * Adds up the totals, and then calls showScores()
 	 */
-	public void finishGame() {
+	public void calculateTotals() {
 		LinearLayout scoreRow;
 		EditText et;
 		int sc;
@@ -330,15 +330,21 @@ public class ScoreView extends Activity {
 			totals[x] = 0;
 		}
 
-		for (int i = 0; i < list.getChildCount(); i++) {
-			scoreRow = (LinearLayout) list.getChildAt(i);
+		for (int i = 0; i < tl.getChildCount(); i++) {
+			scoreRow = (LinearLayout) tl.getChildAt(i);
 			for (int j = 1; j < scoreRow.getChildCount(); j++) {
 				et = (EditText) scoreRow.getChildAt(j);
 				sc = getNumFromET(et);
 				totals[j-1] += sc;
 			}
 		}
-		showScores();
+		
+		//and now update the totals views
+		LinearLayout tot = (LinearLayout)findViewById(R.id.ll_totals);
+		for(int i = 1; i < tot.getChildCount(); i++){
+			TextView tv = (TextView)tot.getChildAt(i);
+			tv.setText(String.valueOf(totals[i-1]));
+		}
 	}
 
 	/**

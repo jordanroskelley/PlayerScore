@@ -10,12 +10,12 @@ Then you can start a game, choose players, enter scores, and see totals. That's 
 it for now. There are still a bunch of bugs and stuff, but that's where we are.
 
 To do in ScoreView.java:
--Create a 'calculateTotals' function in ScoreView
--Create a menu with options to: finish, save, show totals, etc
+-implement save/load
 -Ability to use initials instead of name for small screens (and decrease the round name TextView size)
---Will also need a way to calculate (or have stored) initials
+-Will also need a way to calculate (or have stored) initials
 -Ability to save/resume game, which will help with the following
---Handle life cycle in ScoreView
+-Handle life cycle in ScoreView
+-keep totals state on rotate
 
 
 

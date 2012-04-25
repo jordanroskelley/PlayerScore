@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_alignParentBottom="true"
-        android:visibility="gone"
+		android:visibility="gone"
 	    android:id="@+id/ll_totals" />
     <ScrollView
         android:layout_height="wrap_content"
@@ -23,11 +23,17 @@
         android:layout_below="@id/ll_players"
         android:layout_above="@id/ll_totals"
 	    android:id="@+id/sv_scores">
-        <LinearLayout
+		<TableLayout
+	        android:layout_height="match_parent"
+	        android:layout_width="match_parent"
+            android:id="@+id/tl_scores"
+			android:stretchColumns="*"/>
+			
+		<!--<LinearLayout
             android:orientation="vertical"
 	        android:layout_height="match_parent"
 	        android:layout_width="match_parent"
             android:id="@+id/ll_scores" >
-		</LinearLayout>
+		</LinearLayout>-->
     </ScrollView>
 </RelativeLayout>

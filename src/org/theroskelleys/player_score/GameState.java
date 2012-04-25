@@ -5,9 +5,9 @@ import com.google.gson.Gson;
 public class GameState
 {
 	private String[] players;
-	private int[][] roundScores;
+	private Integer[][] roundScores;
 	
-	public GameState(String[] players, int[][] roundScores){
+	public GameState(String[] players, Integer[][] roundScores){
 		this.players = players;
 		this.roundScores = roundScores;
 	}
@@ -19,10 +19,10 @@ public class GameState
 		this.players = players;
 	}
 	
-	public int[][] getRoundScores(){
+	public Integer[][] getRoundScores(){
 		return roundScores;
 	}
-	public void setRoundScores(int[][] roundScores) {
+	public void setRoundScores(Integer[][] roundScores) {
 		this.roundScores = roundScores;
 	}
 	
