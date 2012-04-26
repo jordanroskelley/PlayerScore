@@ -6,10 +6,14 @@ public class GameState
 {
 	private String[] players;
 	private Integer[][] roundScores;
+	private Boolean isTotalShowing;
+	private String name;
 	
-	public GameState(String[] players, Integer[][] roundScores){
+	public GameState(String[] players, Integer[][] roundScores, Boolean isTotalShowing, String name){
 		this.players = players;
 		this.roundScores = roundScores;
+		this.isTotalShowing = isTotalShowing;
+		this.name = name;
 	}
 	
 	public String[] getPlayers() {
@@ -24,6 +28,22 @@ public class GameState
 	}
 	public void setRoundScores(Integer[][] roundScores) {
 		this.roundScores = roundScores;
+	}
+	
+	public Boolean getIsTotalShowing(){
+		return isTotalShowing;
+	}
+	
+	public void setIsTotalShowing(Boolean isTotalShowing){
+		this.isTotalShowing = isTotalShowing;
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public void setName(String name){
+		this.name = name;
 	}
 	
 	public String toJson(){

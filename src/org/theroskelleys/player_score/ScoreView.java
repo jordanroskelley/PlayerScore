@@ -24,11 +24,11 @@ import android.widget.*;
 public class ScoreView extends Activity {
 	private static final String TAG = "ScoreView";
 	private static final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,1.0f);
-	//private LinearLayout list;
 	TableLayout tl;
 	private String[] players;
 	private int round;
 	private int[] totals;
+	private GameState thisGame;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -36,7 +36,6 @@ public class ScoreView extends Activity {
 		setContentView(R.layout.score_view);
 
 		// get handle to the list
-		//list = (LinearLayout) findViewById(R.id.ll_scores);
 		tl = (TableLayout) findViewById(R.id.tl_scores);
 
 		// if there was a previous instance, set it up
@@ -56,6 +55,7 @@ public class ScoreView extends Activity {
 			initializeNewGame();
 		}
 		setupTotalsRow();
+		calculateTotals();
 	}
 	
 	private TableRow getNewRow(Integer[] roundScores){
@@ -68,6 +68,9 @@ public class ScoreView extends Activity {
 				et = getET(roundScores[i].toString());
 			} else{
 				et = getET();
+			}
+			if(i == 0){
+				et.requestFocus();
 			}
 			rb.addView(et);
 		}
@@ -99,7 +102,7 @@ public class ScoreView extends Activity {
 				build.create().show();
 				return true;
 			case R.id.m_save:
-				
+				saveGame();
 				return true;
 			case R.id.m_done:
 				calculateTotals();
@@ -112,6 +115,7 @@ public class ScoreView extends Activity {
 					totalsLL.setVisibility(View.GONE);
 				} else{
 					totalsLL.setVisibility(View.VISIBLE);
+					calculateTotals();
 				}
 				return true;
 			default:
@@ -137,10 +141,14 @@ public class ScoreView extends Activity {
 
 	/**
 	 * Takes a previous game state, and paints the names and previous scores
-	 * 
 	 * @param gs
 	 */
 	private void setUpGame(GameState gs) {
+		if(gs.getIsTotalShowing()){
+			LinearLayout ll = (LinearLayout)findViewById(R.id.ll_totals);
+			ll.setVisibility(View.VISIBLE);
+		}
+		
 		players = gs.getPlayers();
 		totals = new int[players.length];
 		for(int i = 0; i < totals.length; i++) {
@@ -150,9 +158,7 @@ public class ScoreView extends Activity {
 
 		// add the names row
 		printNames();
-		
 		round = 0;
-
 		for (int i = 0; i < tempScores.length; i++) {
 			tl.addView(getNewRow(tempScores[i]));
 		}
@@ -175,22 +181,61 @@ public class ScoreView extends Activity {
 		Integer[][] scoreArray = new Integer[round][players.length];
 
 		for (int i = 0; i < tl.getChildCount(); i++) {
-			//LinearLayout ll = (LinearLayout) list.getChildAt(i);
-			TableRow ll = (TableRow) tl.getChildAt(i);
+			TableRow row = (TableRow) tl.getChildAt(i);
 			
-			for (int j = 1; j < ll.getChildCount(); j++) {
-				EditText et = (EditText) ll.getChildAt(j);
+			for (int j = 1; j < row.getChildCount(); j++) {
+				EditText et = (EditText) row.getChildAt(j);
 				Integer s = getNumFromET(et);
 				scoreArray[i][j - 1] = s;
 			}
 		}
-		return new GameState(players, scoreArray);
+		Boolean b;
+		LinearLayout totView = (LinearLayout)findViewById(R.id.ll_totals);
+		if(totView.getVisibility() == View.GONE){
+			b = false;
+		} else {
+			b = true;
+		}
+		
+		//get saved game name from previous instance of thisGame if available
+		//......................
+		
+		return new GameState(players, scoreArray, b, null);
+	}
+	
+	private void saveGame(){
+		thisGame = toGameState();
+		if(thisGame.getName() == null){
+		//get name
+		AlertDialog.Builder build = new AlertDialog.Builder(this);
+		build.setMessage("Please ebter a save name:")
+			.setPositiveButton("OK", new AlertDialog.OnClickListener() {
+				public void onClick(DialogInterface p1, int p2) {
+					String name = "hi";
+					//TODO set et view in dialog to get name and get that here
+					finishSaving(name);
+				}
+			})
+			.setNegativeButton("Cancel", new AlertDialog.OnClickListener() {
+				public void onClick(DialogInterface p1, int p2) {
+				}
+			});
+		
+		build.create().show();
+		}
+	}
+	
+	private void finishSaving(String name){
+		thisGame.setName(name);
+		//now i need to de-serialize the current saved games array, add this, and re-serialize it...
+		Gson g = new Gson();
+		String out = g.toJson(thisGame);
+		Toast.makeText(this, out, Toast.LENGTH_LONG).show();
 	}
 
 	/**
 	 * Creates a 'New Round' button that creates a new TableRow in which to
 	 * enter scores
-	 * 
 	 * @return - a Button view
 	 */
 	private Button getNewRoundButton() {
@@ -208,9 +253,7 @@ public class ScoreView extends Activity {
 
 	/**
 	 * Sets up a new TextView with a given name pre-filled in it
-	 * 
-	 * @param name
-	 *            - the name to put in the TextView
+	 * @param name - the name to put in the TextView
 	 * @return - the actual, newly instantiated TextView
 	 */
 	private TextView getTV() {
@@ -235,8 +278,7 @@ public class ScoreView extends Activity {
 
 	private TextView getScoreTV() {
 		TextView tv = new TextView(this);
-		//tv.setLayoutParams(lp);
-		tv.setTextSize(15);
+		tv.setTextSize(20);
 		tv.setGravity(Gravity.CENTER);
 		return tv;
 	}
@@ -250,15 +292,25 @@ public class ScoreView extends Activity {
 	private EditText getET() {
 		EditText et = new EditText(this);
 		et.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-		//et.setLayoutParams(lp);
-		et.setOnFocusChangeListener(new OnFocusChangeListener() {
-			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				if (!hasFocus) {
-					calculateTotals();
-					//Toast.makeText(v.getContext(), "lost focus", Toast.LENGTH_SHORT).show();
+		et.setOnKeyListener(new EditText.OnKeyListener(){
+				public boolean onKey(View p1, int p2, KeyEvent p3)
+				{
+					if(p3.getKeyCode() == KeyEvent.KEYCODE_0 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_1 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_2 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_3 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_4 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_5 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_6 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_7 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_8 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_9 || 
+					   p3.getKeyCode() == KeyEvent.KEYCODE_DEL
+					){
+						calculateTotals();
+					}
+					return false;
 				}
-			}
 		});
 		return et;
 	}
@@ -266,8 +318,7 @@ public class ScoreView extends Activity {
 	/**
 	 * gets an integer from out of an EditText
 	 * 
-	 * @param et
-	 *            - the EditText to check
+	 * @param et - the EditText to check
 	 * @return - the number found in the EditText
 	 */
 	private static Integer getNumFromET(EditText et) {
@@ -306,9 +357,7 @@ public class ScoreView extends Activity {
 
 	/**
 	 * Looks up the names of the players for this round
-	 * 
-	 * @return - an array of the names of the players chosen in the previous
-	 *         Activity
+	 * @return - an array of the names of the players chosen in the previous Activity
 	 */
 	private String[] getChosenNames() {
 		SharedPreferences sp = PreferenceManager
@@ -320,7 +369,7 @@ public class ScoreView extends Activity {
 	}
 
 	/**
-	 * Adds up the totals, and then calls showScores()
+	 * Adds up the totals
 	 */
 	public void calculateTotals() {
 		LinearLayout scoreRow;
@@ -366,11 +415,15 @@ public class ScoreView extends Activity {
 					public void onClick(DialogInterface p1, int p2) {
 						// new
 						// TODO figure this out :)
+						tl.removeAllViews();
+						round = 0;
+						TableRow row = getNewRow(null);
+						tl.addView(row);
+						calculateTotals();
 					}
 				})
 				.setNegativeButton("Quit", new AlertDialog.OnClickListener() {
 					public void onClick(DialogInterface p1, int p2) {
-						// quit
 						finish();
 					}
 				})
