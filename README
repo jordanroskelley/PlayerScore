@@ -6,16 +6,14 @@ In settings, you can add players. It stores those players in a json string
 in the shared preferences. I may eventually need a database, but shared preferences
 works for now.
 
-Then you can start a game, choose players, enter scores, and see totals. That's about
-it for now. There are still a bunch of bugs and stuff, but that's where we are.
+Then you can start a game, choose players, enter scores, and see totals. It keeps state on
+rotation for the game. That's about it for now. There are still a bunch of bugs and
+stuff, but that's where we are.
 
-To do in ScoreView.java:
--implement save/load
+To do:
+-check that saves exist before showing load menu (otherwise, FC)
+-create small screen friendly views
 -Ability to use initials instead of name for small screens (and decrease the round name TextView size)
 -Will also need a way to calculate (or have stored) initials
--Ability to save/resume game, which will help with the following
--Handle life cycle in ScoreView
--keep totals state on rotate
-
-
-
+-a way to delete saved games without having to load and 'finish' them
+-check rotation on settings
