@@ -40,30 +40,27 @@ public class ScoreView extends Activity {
 		// get handle to the list
 		tl = (TableLayout) findViewById(R.id.tl_scores);
 		
-		
 		String gString = getIntent().getStringExtra("GameState");
 		int sgn = getIntent().getIntExtra("sgn", -1);
 		if(gString != null){
-			// if there was a previous instance, set it up
+			//load game from bundle
 			Gson g = new Gson();
-			GameState previousGame = g.fromJson(gString, GameState.class);
-			// set up this game using the previous state
-			setUpGame(previousGame);
+			thisGame = g.fromJson(gString, GameState.class);
+			setUpGame(thisGame);
 		}
 		else if(sgn != -1){
-			//look up that game, and set it up
-			GameState game = getGameState(sgn);
-			thisGame = game;
-			setUpGame(game);
+			//load saved game
+			thisGame = loadGameState(sgn);
+			setUpGame(thisGame);
 		} else {
-			// initialize variables for a new game
+			//initialize new game
 			initializeNewGame();
 		}
 		setupTotalsRow();
 		calculateTotals();
 	}
 	
-	private GameState getGameState(int num){
+	private GameState loadGameState(int num){
 		//read games, pick one from array, return that one
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		String gamesString = sp.getString("games", null);
@@ -163,6 +160,10 @@ public class ScoreView extends Activity {
 			ll.setVisibility(View.VISIBLE);
 		}
 		
+		if(gs.getName() != null){
+			setTitle("test: " + gs.getName());
+		}
+		
 		players = gs.getPlayers();
 		totals = new int[players.length];
 		for(int i = 0; i < totals.length; i++) {
@@ -194,8 +195,8 @@ public class ScoreView extends Activity {
 	 * @return
 	 */
 	public GameState toGameState() {
+		//get the scores
 		Integer[][] scoreArray = new Integer[round][players.length];
-
 		for (int i = 0; i < tl.getChildCount(); i++) {
 			TableRow row = (TableRow) tl.getChildAt(i);
 			
@@ -205,6 +206,8 @@ public class ScoreView extends Activity {
 				scoreArray[i][j - 1] = s;
 			}
 		}
+		
+		//get whether or not the totals is showing
 		Boolean b;
 		LinearLayout totView = (LinearLayout)findViewById(R.id.ll_totals);
 		if(totView.getVisibility() == View.GONE){
@@ -214,7 +217,6 @@ public class ScoreView extends Activity {
 		}
 		
 		String gameName = null;
-		//get saved game name from previous instance of thisGame if available
 		if(thisGame != null){
 			gameName = thisGame.getName();
 		}
@@ -234,7 +236,6 @@ public class ScoreView extends Activity {
 				.setPositiveButton("OK", new AlertDialog.OnClickListener() {
 					public void onClick(DialogInterface p1, int p2) {
 						String name = nameET.getText().toString();
-						//TODO set et view in dialog to get name and get that here
 						thisGame.setName(name);
 						finishSaving();
 					}

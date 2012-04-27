@@ -39,22 +39,26 @@ public class MainActivity extends Activity
     		break;
 		case R.id.btn_load:
 			GameState[] games = getSavedGames(this);
-			String[] gNames = new String[games.length];
-			for(int c = 0; c < games.length; c++){
-				gNames[c] = games[c].getName();
-			}
-			
-			AlertDialog.Builder b = new AlertDialog.Builder(this);
-			b.setTitle("Which to load:")
-				.setItems(gNames, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int item) {
-						//store that number, we will load that game
-						Intent intent = new Intent(getApplicationContext(), ScoreView.class);
-						intent.putExtra("sgn", item);
-						startActivity(intent);
-					}
-				});
-			b.create().show();
+			if(games.length == 0){
+				Toast.makeText(getApplicationContext(), "You have no saved games.", Toast.LENGTH_LONG).show();
+			} else {
+				String[] gNames = new String[games.length];
+				for(int c = 0; c < games.length; c++){
+					gNames[c] = games[c].getName();
+				}
+				
+				AlertDialog.Builder b = new AlertDialog.Builder(this);
+				b.setTitle("Which to load:")
+					.setItems(gNames, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int item) {
+							//store that number, we will load that game
+							Intent intent = new Intent(getApplicationContext(), ScoreView.class);
+							intent.putExtra("sgn", item);
+							startActivity(intent);
+						}
+					});
+				b.create().show();
+				}
 			break;
 		}
     }
@@ -64,7 +68,11 @@ public class MainActivity extends Activity
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
 		Gson g = new Gson();
 		String jsonValues = sp.getString("games", null);
-		retVal = g.fromJson(jsonValues, GameState[].class);
+		if(jsonValues == null){
+			retVal = new GameState[0];
+		} else {
+			retVal = g.fromJson(jsonValues, GameState[].class);
+		}
 		return retVal;
 	}
 	

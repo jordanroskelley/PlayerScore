@@ -67,9 +67,8 @@ public class Settings extends ListActivity
 		et.setOnKeyListener(new View.OnKeyListener(){
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent e){
-				if((e.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
+				if(e.getKeyCode() == KeyEvent.KEYCODE_ENTER){
 					addName();
-					return true;
 				}
 				return false;
 			}
