@@ -8,6 +8,7 @@ import android.content.*;
 import android.preference.*;
 import com.google.gson.*;
 import android.widget.*;
+import android.util.*;
 
 public class MainActivity extends Activity
 {
@@ -36,8 +37,36 @@ public class MainActivity extends Activity
 			i = new Intent(this, Settings.class);
 			startActivity(i);
     		break;
-    	}
+		case R.id.btn_load:
+			GameState[] games = getSavedGames(this);
+			String[] gNames = new String[games.length];
+			for(int c = 0; c < games.length; c++){
+				gNames[c] = games[c].getName();
+			}
+			
+			AlertDialog.Builder b = new AlertDialog.Builder(this);
+			b.setTitle("Which to load:")
+				.setItems(gNames, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						//store that number, we will load that game
+						Intent intent = new Intent(getApplicationContext(), ScoreView.class);
+						intent.putExtra("sgn", item);
+						startActivity(intent);
+					}
+				});
+			b.create().show();
+			break;
+		}
     }
+	
+	public static GameState[] getSavedGames(Context ctx){
+		GameState[] retVal;
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
+		Gson g = new Gson();
+		String jsonValues = sp.getString("games", null);
+		retVal = g.fromJson(jsonValues, GameState[].class);
+		return retVal;
+	}
 	
 	public static String[] getAllNames(Context ctx){
 		String[] retVal;

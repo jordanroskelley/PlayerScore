@@ -20,6 +20,8 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import android.view.*;
 import android.widget.*;
+import java.util.*;
+import java.lang.reflect.*;
 
 public class ScoreView extends Activity {
 	private static final String TAG = "ScoreView";
@@ -37,25 +39,37 @@ public class ScoreView extends Activity {
 
 		// get handle to the list
 		tl = (TableLayout) findViewById(R.id.tl_scores);
-
-		// if there was a previous instance, set it up
-		GameState previousGame = null;
-		String gameStr = null;
-		try{
-			gameStr = savedInstanceState.getString("GameState");
-		} catch(Exception e){}
 		
-		if(gameStr != null){
+		
+		String gString = getIntent().getStringExtra("GameState");
+		int sgn = getIntent().getIntExtra("sgn", -1);
+		if(gString != null){
+			// if there was a previous instance, set it up
 			Gson g = new Gson();
-			previousGame = g.fromJson(gameStr, GameState.class);
-			// set up the current game using the previous state
+			GameState previousGame = g.fromJson(gString, GameState.class);
+			// set up this game using the previous state
 			setUpGame(previousGame);
+		}
+		else if(sgn != -1){
+			//look up that game, and set it up
+			GameState game = getGameState(sgn);
+			thisGame = game;
+			setUpGame(game);
 		} else {
 			// initialize variables for a new game
 			initializeNewGame();
 		}
 		setupTotalsRow();
 		calculateTotals();
+	}
+	
+	private GameState getGameState(int num){
+		//read games, pick one from array, return that one
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		String gamesString = sp.getString("games", null);
+		Gson g = new Gson();
+		GameState[] games = g.fromJson(gamesString, GameState[].class);
+		return games[num];
 	}
 	
 	private TableRow getNewRow(Integer[] roundScores){
@@ -170,7 +184,9 @@ public class ScoreView extends Activity {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putString("GameState", toGameState().toJson());
+		try{
+			outState.putString("GameState", toGameState().toJson());
+		} catch(Exception e){}
 	}
 
 	/**
@@ -197,40 +213,68 @@ public class ScoreView extends Activity {
 			b = true;
 		}
 		
+		String gameName = null;
 		//get saved game name from previous instance of thisGame if available
-		//......................
+		if(thisGame != null){
+			gameName = thisGame.getName();
+		}
 		
-		return new GameState(players, scoreArray, b, null);
+		return new GameState(players, scoreArray, b, gameName);
 	}
 	
 	private void saveGame(){
 		thisGame = toGameState();
 		if(thisGame.getName() == null){
-		//get name
-		AlertDialog.Builder build = new AlertDialog.Builder(this);
-		build.setMessage("Please ebter a save name:")
-			.setPositiveButton("OK", new AlertDialog.OnClickListener() {
-				public void onClick(DialogInterface p1, int p2) {
-					String name = "hi";
-					//TODO set et view in dialog to get name and get that here
-					finishSaving(name);
-				}
-			})
-			.setNegativeButton("Cancel", new AlertDialog.OnClickListener() {
-				public void onClick(DialogInterface p1, int p2) {
-				}
-			});
-		
-		build.create().show();
+			//get name
+			final EditText nameET = new EditText(this);
+			
+			AlertDialog.Builder build = new AlertDialog.Builder(this);
+			build.setMessage("Please enter a save name:")
+				.setView(nameET)
+				.setPositiveButton("OK", new AlertDialog.OnClickListener() {
+					public void onClick(DialogInterface p1, int p2) {
+						String name = nameET.getText().toString();
+						//TODO set et view in dialog to get name and get that here
+						thisGame.setName(name);
+						finishSaving();
+					}
+				})
+				.setNegativeButton("Cancel", new AlertDialog.OnClickListener() {
+					public void onClick(DialogInterface p1, int p2) {}
+				});
+			build.create().show();
+		} else{
+			finishSaving();
 		}
 	}
 	
-	private void finishSaving(String name){
-		thisGame.setName(name);
-		//now i need to de-serialize the current saved games array, add this, and re-serialize it...
+	private void finishSaving(){
+		//now, de-serialize the current saved games array, add thisGame, and re-serialize it
+		//get old list. if it is null, make new. otherwise, read in old, add this, re-serialize, and re-commit
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		String gamesString = sp.getString("games", null);
 		Gson g = new Gson();
-		String out = g.toJson(thisGame);
-		Toast.makeText(this, out, Toast.LENGTH_LONG).show();
+		ArrayList<GameState> games = new ArrayList<GameState>();
+		
+		if(gamesString != null) {
+			GameState[] arrGames = g.fromJson(gamesString, GameState[].class);
+			games = new ArrayList<GameState>(Arrays.asList(arrGames));
+		}
+		boolean isAdded = false;
+		for(int i = 0; i < games.size(); i++){
+			if(thisGame.getName().equals(games.get(i).getName())){
+				games.set(i, thisGame);
+				isAdded = true;
+			}
+		}
+		if(!isAdded){
+			games.add(thisGame);
+		}
+		
+		String out = g.toJson(games);
+		SharedPreferences.Editor ed = sp.edit();
+		ed.putString("games", out);
+		ed.commit();
 	}
 
 	/**
@@ -413,17 +457,18 @@ public class ScoreView extends Activity {
 		build.setMessage(output.toString())
 				.setPositiveButton("New", new AlertDialog.OnClickListener() {
 					public void onClick(DialogInterface p1, int p2) {
-						// new
-						// TODO figure this out :)
+						//TODO remove current save from saves
 						tl.removeAllViews();
 						round = 0;
 						TableRow row = getNewRow(null);
 						tl.addView(row);
+						thisGame = null;
 						calculateTotals();
 					}
 				})
 				.setNegativeButton("Quit", new AlertDialog.OnClickListener() {
 					public void onClick(DialogInterface p1, int p2) {
+						//TODO maybe ask if they want current removed...
 						finish();
 					}
 				})
