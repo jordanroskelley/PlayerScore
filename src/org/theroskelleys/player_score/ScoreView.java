@@ -40,7 +40,11 @@ public class ScoreView extends Activity {
 		// get handle to the list
 		tl = (TableLayout) findViewById(R.id.tl_scores);
 		
-		String gString = getIntent().getStringExtra("GameState");
+		String gString = null;
+		if(savedInstanceState != null){
+			gString = savedInstanceState.getString("GameState", "not found");
+		}
+		//String gString = getIntent().getStringExtra("GameState");
 		int sgn = getIntent().getIntExtra("sgn", -1);
 		if(gString != null){
 			//load game from bundle
@@ -161,7 +165,7 @@ public class ScoreView extends Activity {
 		}
 		
 		if(gs.getName() != null){
-			setTitle("test: " + gs.getName());
+			setTitle(getResources().getString(R.string.app_name)+": " + gs.getName());
 		}
 		
 		players = gs.getPlayers();
@@ -184,10 +188,13 @@ public class ScoreView extends Activity {
 	 */
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
 		try{
-			outState.putString("GameState", toGameState().toJson());
-		} catch(Exception e){}
+			String gstate = toGameState().toJson();
+			outState.putString("GameState", gstate);
+		} catch(Exception e){
+			Toast.makeText(this, "Error saving state", Toast.LENGTH_LONG).show();
+		}
+		super.onSaveInstanceState(outState);
 	}
 
 	/**
@@ -237,6 +244,7 @@ public class ScoreView extends Activity {
 					public void onClick(DialogInterface p1, int p2) {
 						String name = nameET.getText().toString();
 						thisGame.setName(name);
+						setTitle(getResources().getString(R.string.app_name) + ": " + name);
 						finishSaving();
 					}
 				})

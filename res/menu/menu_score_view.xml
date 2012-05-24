@@ -7,9 +7,9 @@
 		android:id="@+id/m_total"
 		android:title="Show/Hide Running Totals"/>
 	<item
-		android:id="@+id/m_end"
-		android:title="Quit Game"/>
-	<item
 		android:id="@+id/m_done"
 		android:title="Finish Game"/>
+	<item
+		android:id="@+id/m_end"
+		android:title="Quit Game"/>
 </menu>

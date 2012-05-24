@@ -49,16 +49,16 @@ public class MainActivity extends Activity
 				
 				AlertDialog.Builder b = new AlertDialog.Builder(this);
 				b.setTitle("Which to load:")
-					.setItems(gNames, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int item) {
-							//store that number, we will load that game
-							Intent intent = new Intent(getApplicationContext(), ScoreView.class);
-							intent.putExtra("sgn", item);
-							startActivity(intent);
-						}
-					});
+				.setItems(gNames, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						//store that number, we will load that game
+						Intent intent = new Intent(getApplicationContext(), ScoreView.class);
+						intent.putExtra("sgn", item);
+						startActivity(intent);
+					}
+				});
 				b.create().show();
-				}
+			}
 			break;
 		}
     }
