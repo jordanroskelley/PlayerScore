@@ -6,10 +6,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -21,10 +19,8 @@ import com.google.gson.Gson;
 import android.view.*;
 import android.widget.*;
 import java.util.*;
-import java.lang.reflect.*;
 
 public class ScoreView extends Activity {
-	private static final String TAG = "ScoreView";
 	private static final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,1.0f);
 	TableLayout tl;
 	private String[] players;
@@ -42,19 +38,15 @@ public class ScoreView extends Activity {
 		
 		String gString = null;
 		if(savedInstanceState != null){
-			gString = savedInstanceState.getString("GameState", "not found");
+			gString = savedInstanceState.getString("GameState", "");
+		} else {
+			gString = getIntent().getExtras().getString("GameState");
 		}
-		//String gString = getIntent().getStringExtra("GameState");
-		int sgn = getIntent().getIntExtra("sgn", -1);
+		
 		if(gString != null){
-			//load game from bundle
+			//load game
 			Gson g = new Gson();
 			thisGame = g.fromJson(gString, GameState.class);
-			setUpGame(thisGame);
-		}
-		else if(sgn != -1){
-			//load saved game
-			thisGame = loadGameState(sgn);
 			setUpGame(thisGame);
 		} else {
 			//initialize new game
@@ -64,32 +56,21 @@ public class ScoreView extends Activity {
 		calculateTotals();
 	}
 	
-	private GameState loadGameState(int num){
-		//read games, pick one from array, return that one
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-		String gamesString = sp.getString("games", null);
-		Gson g = new Gson();
-		GameState[] games = g.fromJson(gamesString, GameState[].class);
-		return games[num];
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		try{
+			String gstate = toGameState().toJson();
+			outState.putString("GameState", gstate);
+		} catch(Exception e){
+			Toast.makeText(this, "Error saving state", Toast.LENGTH_LONG).show();
+		}
+		super.onSaveInstanceState(outState);
 	}
 	
-	private TableRow getNewRow(Integer[] roundScores){
-		TableRow rb = new TableRow(this);
-		round++;
-		rb.addView(getScoreTV("Round "+round));
-		EditText et;
-		for(int i = 0; i < players.length; i++){
-			if(roundScores != null && roundScores[i] != null){
-				et = getET(roundScores[i].toString());
-			} else{
-				et = getET();
-			}
-			if(i == 0){
-				et.requestFocus();
-			}
-			rb.addView(et);
-		}
-		return rb;
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		//set up stuff, and detect size...
 	}
 	
 	@Override
@@ -137,10 +118,26 @@ public class ScoreView extends Activity {
 				return super.onOptionsItemSelected(mi);
 		}
 	}
-
-	/**
-	 * sets up some variables for a new game
-	 */
+	
+	private TableRow getNewRow(Integer[] roundScores){
+		TableRow rb = new TableRow(this);
+		round++;
+		rb.addView(getScoreTV("Round "+round));
+		EditText et;
+		for(int i = 0; i < players.length; i++){
+			if(roundScores != null && roundScores[i] != null){
+				et = getET(roundScores[i].toString());
+			} else{
+				et = getET();
+			}
+			if(i == 0){
+				et.requestFocus();
+			}
+			rb.addView(et);
+		}
+		return rb;
+	}
+	
 	private void initializeNewGame() {
 		// initialize variable
 		players = getChosenNames();
@@ -153,11 +150,7 @@ public class ScoreView extends Activity {
 		TableRow r = getNewRow(null);
 		tl.addView(r);
 	}
-
-	/**
-	 * Takes a previous game state, and paints the names and previous scores
-	 * @param gs
-	 */
+	
 	private void setUpGame(GameState gs) {
 		if(gs.getIsTotalShowing()){
 			LinearLayout ll = (LinearLayout)findViewById(R.id.ll_totals);
@@ -182,25 +175,7 @@ public class ScoreView extends Activity {
 			tl.addView(getNewRow(tempScores[i]));
 		}
 	}
-
-	/**
-	 * This is to help us when the screen rotates
-	 */
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		try{
-			String gstate = toGameState().toJson();
-			outState.putString("GameState", gstate);
-		} catch(Exception e){
-			Toast.makeText(this, "Error saving state", Toast.LENGTH_LONG).show();
-		}
-		super.onSaveInstanceState(outState);
-	}
-
-	/**
-	 * Grabs this current game, and packages it up into a GameState object
-	 * @return
-	 */
+	
 	public GameState toGameState() {
 		//get the scores
 		Integer[][] scoreArray = new Integer[round][players.length];
@@ -285,12 +260,7 @@ public class ScoreView extends Activity {
 		ed.putString("games", out);
 		ed.commit();
 	}
-
-	/**
-	 * Creates a 'New Round' button that creates a new TableRow in which to
-	 * enter scores
-	 * @return - a Button view
-	 */
+	
 	private Button getNewRoundButton() {
 		Button b = new Button(this);
 		b.setText("New");
@@ -303,12 +273,7 @@ public class ScoreView extends Activity {
 		});
 		return b;
 	}
-
-	/**
-	 * Sets up a new TextView with a given name pre-filled in it
-	 * @param name - the name to put in the TextView
-	 * @return - the actual, newly instantiated TextView
-	 */
+	
 	private TextView getTV() {
 		TextView tv = new TextView(this);
 		tv.setLayoutParams(lp);
@@ -367,13 +332,7 @@ public class ScoreView extends Activity {
 		});
 		return et;
 	}
-
-	/**
-	 * gets an integer from out of an EditText
-	 * 
-	 * @param et - the EditText to check
-	 * @return - the number found in the EditText
-	 */
+	
 	private static Integer getNumFromET(EditText et) {
 		int returnValue;
 		String s = et.getText().toString();
@@ -384,10 +343,7 @@ public class ScoreView extends Activity {
 		}
 		return returnValue;
 	}
-
-	/**
-	 * Prints the names of the current players to the table
-	 */
+	
 	private void printNames() {
 		LinearLayout playerLL = (LinearLayout) findViewById(R.id.ll_players);
 		playerLL.addView(getNewRoundButton());
@@ -403,15 +359,11 @@ public class ScoreView extends Activity {
 		TextView titleTV = getTV("Totals");
 		totalLL.addView(titleTV);
 
-		for (String name : players) {
+		for (int i = 0; i < players.length; i++) {
 			totalLL.addView(getTV());
 		}
 	}
-
-	/**
-	 * Looks up the names of the players for this round
-	 * @return - an array of the names of the players chosen in the previous Activity
-	 */
+	
 	private String[] getChosenNames() {
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(this);
@@ -420,10 +372,7 @@ public class ScoreView extends Activity {
 		return g.fromJson(jsonChosenNames, String[].class);
 
 	}
-
-	/**
-	 * Adds up the totals
-	 */
+	
 	public void calculateTotals() {
 		LinearLayout scoreRow;
 		EditText et;
@@ -448,11 +397,7 @@ public class ScoreView extends Activity {
 			tv.setText(String.valueOf(totals[i-1]));
 		}
 	}
-
-	/**
-	 * Creates a dialog to show the scores, and allow the user to choose whether
-	 * to continue, quit, or start a new game
-	 */
+	
 	private void showScores() {
 		StringBuilder output = new StringBuilder();
 		output.append("Scores");

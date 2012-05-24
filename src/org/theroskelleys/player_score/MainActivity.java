@@ -2,16 +2,20 @@ package org.theroskelleys.player_score;
 
 import android.app.*;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.*;
 import android.view.View;
 import android.content.*;
 import android.preference.*;
+
 import com.google.gson.*;
+
 import android.widget.*;
-import android.util.*;
 
 public class MainActivity extends Activity
 {
+	final Context context = this;
+	
     @Override
     public void onCreate(Bundle savedInstanceState)
 	{
@@ -51,9 +55,15 @@ public class MainActivity extends Activity
 				b.setTitle("Which to load:")
 				.setItems(gNames, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
+						SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+						String gamesString = sp.getString("games", null);
+						Gson g = new Gson();
+						GameState[] games = g.fromJson(gamesString, GameState[].class);
+						String gameJson = games[item].toJson();
+						
 						//store that number, we will load that game
 						Intent intent = new Intent(getApplicationContext(), ScoreView.class);
-						intent.putExtra("sgn", item);
+						intent.putExtra("GameState", gameJson);
 						startActivity(intent);
 					}
 				});
