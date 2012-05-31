@@ -37,12 +37,15 @@ public class ScoreView extends Activity {
 		tl = (TableLayout) findViewById(R.id.tl_scores);
 		
 		String gString = null;
-		if(savedInstanceState != null){
-			gString = savedInstanceState.getString("GameState", "");
-		} else {
-			gString = getIntent().getExtras().getString("GameState");
+		try{
+			if(savedInstanceState != null){
+				gString = savedInstanceState.getString("GameState", null);
+			} else {
+				gString = getIntent().getExtras().getString("GameState");
+			}
+		} catch(Exception e){
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		
 		if(gString != null){
 			//load game
 			Gson g = new Gson();
@@ -259,6 +262,7 @@ public class ScoreView extends Activity {
 		SharedPreferences.Editor ed = sp.edit();
 		ed.putString("games", out);
 		ed.commit();
+		Toast.makeText(this, "Game "+thisGame.getName()+" saved", Toast.LENGTH_SHORT).show();
 	}
 	
 	private Button getNewRoundButton() {
